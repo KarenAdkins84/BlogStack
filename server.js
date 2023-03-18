@@ -28,8 +28,6 @@ app.use('/api/v1/posts', postRoutes);
 ///api/v1/comments
 app.use('/api/v1/comments', commentRoutes);
 
-
-
 //error handler middlewares
 
 //listen server
