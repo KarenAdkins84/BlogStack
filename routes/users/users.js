@@ -1,4 +1,6 @@
 const express = require('express');
+const multer = require('multer');
+const storage = require('../../config/coudinary');
 const { 
     registerCtrl, 
     loginCtrl, 
@@ -13,23 +15,34 @@ const {
 
 const protected = require('../../middlewares/protected')
 const userRoutes = express.Router();
-
+//instance of multer
+const upload = multer({storage})
 userRoutes.post('/register', registerCtrl);
 
 //POST/api/v1/users/login
 userRoutes.post('/login', loginCtrl);
 
+//GET/api/v1/users/profile
+userRoutes.get('/profile', protected, profileCtrl);
+
 //GET/api/v1/users/:id
 userRoutes.get('/:id', userDetailsCtrl);
 
-//GET/api/v1/users/profile/:id
-userRoutes.get('/profile/:id', protected, profileCtrl);
-
 //PUT/api/v1/users/profile-photo-upload/:id
-userRoutes.put('/profile-photo-upload/:id', uploadProfilePhotoCtrl);
+userRoutes.put(
+    '/profile-photo-upload/',
+    protected, 
+    upload.single('profile'), 
+    uploadProfilePhotoCtrl
+    );
 
 //PUT/api/v1/users/cover-photo-upload/:id
-userRoutes.put('/cover-photo-upload/:id', uploadCoverPhotoCtrl);
+userRoutes.put(
+    '/cover-photo-upload/',
+    protected,
+    upload.single('cover'), 
+    uploadCoverPhotoCtrl
+    );
 
 //PUT/api/v1/users/update-password/:id
 userRoutes.put('/update-password/:id', updatePasswordCtrl);

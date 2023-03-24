@@ -68,9 +68,13 @@ const loginCtrl = async(req, res, next)=>{
 //details
 const userDetailsCtrl = async(req, res)=>{
     try {
+        //get userId from params
+        const userId = req.params.id;
+        // find the user
+        const user = await User.findById(userId);
         res.json({
             status: 'success',
-            user: 'User details'
+            data: user,
         });
     } catch (error) {
         res.json(error);
@@ -80,9 +84,13 @@ const userDetailsCtrl = async(req, res)=>{
 //profile
 const profileCtrl = async(req, res)=>{
     try {
+        //get the logged in user
+        const userId = req.session.userAuth;
+        //find the user
+        const user = await User.findById(userId).populate('posts');
         res.json({
             status: 'success',
-            user: 'User profile'
+            data: user
         });
     } catch (error) {
         res.json(error);
@@ -90,50 +98,124 @@ const profileCtrl = async(req, res)=>{
 };
 
 //profile-photo-upload
-const uploadProfilePhotoCtrl = async(req, res)=>{
+const uploadProfilePhotoCtrl = async(req, res, next)=>{
+    console.log(req.file.path)
     try {
+        //find the user to be updated
+        const userId = req.session.userAuth;
+        const userFound = await User.findById(userId);
+        //check if user found
+        if(!userFound){
+            return next(appErr('User not found', 403))
+        }
+        //update profile photo
+        await User.findByIdAndUpdate(
+            userId, 
+            {
+                profileImage: req.file.path,
+            },
+            {
+                new: true,
+            }
+        );
         res.json({
             status: 'success',
-            user: 'User profile image upload'
+            data: 'You have successfully updated your profile photo',
         });
     } catch (error) {
         res.json(error);
+        next(appErr(error.message));
     }
 };
 
 //upload-cover-image
 const uploadCoverPhotoCtrl = async(req, res)=>{
     try {
+        //find the user to be updated
+        const userId = req.session.userAuth;
+        const userFound = await User.findById(userId);
+        //check if user found
+        if(!userFound){
+            return next(appErr('User not found', 403))
+        }
+        //update cover photo
+        await User.findByIdAndUpdate(
+            userId, 
+            {
+                coverImage: req.file.path,
+            },
+            {
+                new: true,
+            }
+        );
         res.json({
             status: 'success',
-            user: 'User cover image upload'
+            data: 'You have successfully updated your cover photo',
         });
     } catch (error) {
         res.json(error);
+        next(appErr(error.message));
     }
 };
 
 //update password
-const updatePasswordCtrl = async(req, res)=>{
+const updatePasswordCtrl = async(req, res, next)=>{
+    //destructore password to update
+    const { password } = req.body;
     try {
-        res.json({
-            status: 'success',
-            user: 'User password update'
-        });
+        //check if user is updating the password
+        if (password) {
+            const salt = await bcrypt.genSalt(10);
+            const passwordHashed = await bcrypt.hash(password, salt);
+            //update user
+            await User.findByIdAndUpdate(
+                req.params.id, 
+                {
+                    password: passwordHashed,
+                },
+                {
+                    new: true,
+                }
+            );
+            res.json({
+                status: 'success',
+                user: "Password has been changed successfully",
+            });
+        }
     } catch (error) {
-        res.json(error);
+        return next(appErr('Please provide password field'));
     }
 };
 
 //update user
 const updateUserCtrl = async (req, res) => {
+    
+    const {fullname, email, password} = req.body
     try {
+        //check that email has not been used before
+        if(email){
+            const emailUsed = await User.findOne({ email });
+            if(emailUsed){
+                return next(appErr('Email is already in use', 400));
+            }
+        }
+        //update user
+        const user = await User.findByIdAndUpdate(
+            req.params.id,
+            {
+                fullname,
+                email,
+            },
+            {
+                new: true,
+            }
+        );
         res.json({
             status: 'success',
-            user: 'User update'
+            data: user,
         });
     } catch (error) {
-        res.json(error); 
+        return next(appErr(error.message)); 
     }
 };
 
