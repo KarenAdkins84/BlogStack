@@ -16,8 +16,39 @@ const {
 const protected = require('../../middlewares/protected')
 const userRoutes = express.Router();
 //instance of multer
-const upload = multer({storage})
-userRoutes.post('/register', registerCtrl);
+const upload = multer({ storage });
+
+//render views routes//
+
+//rendering forms
+//login form
+userRoutes.get('/login', (req, res) => {
+    res.render('users/login');
+});
+//register form
+userRoutes.get('/register', (req, res) => {
+    res.render('users/register');
+});
+//profile template
+userRoutes.get('/profile-page', (req, res) => {
+    res.render('users/profile');
+});
+//upload profile photo
+userRoutes.get('/upload-profile-photo-form', (req, res) => {
+    res.render('users/uploadProfilePhoto');
+});
+//upload cover photo
+userRoutes.get('/upload-cover-photo-form', (req, res) => {
+    res.render('users/uploadCoverPhoto');
+});
+//update user form
+userRoutes.get('/update-user-form', (req, res) => {
+    res.render('users/updateUser');
+});
+
+//api routes//
+//POST/api/v1/users/register
+userRoutes.post('/register', upload.single('profile'), registerCtrl);
 
 //POST/api/v1/users/login
 userRoutes.post('/login', loginCtrl);

@@ -12,9 +12,14 @@ require('./config/dbConnect');
 
 const app = express();
 //middlewares
-//-------
-app.use(express.json()); //parse incoming data
-
+//config ejs
+app.set('view engine', "ejs");
+//serve static files
+app.use(express.static(__dirname, +"/public"));
+//parse incoming data
+app.use(express.json());
+//parse form data 
+app.use(express.urlencoded({ extended: true }));
 //session config
 app.use(
     session({
@@ -27,6 +32,12 @@ app.use(
         }),
     })
 );
+
+//render home
+app.get('/', (req, res)=>{
+    res.render('index')
+})
+
 //users route base url
 ///api/v1/users
 app.use('/api/v1/users', userRoutes);
