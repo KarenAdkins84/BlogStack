@@ -8,14 +8,18 @@ const registerCtrl = async(req, res, next)=>{
     console.log(req.body);
     //check if field is empty
     if(!fullname || !email || !password){
-        return next(appErr('All fields are required'))
+        return res.render('users/register',{
+            error: "All fields are required",
+        });
     }
     try {
         //check if user exists by email
         const userFound = await User.findOne({ email });
         //throw an error
         if(userFound){
-            return next(appErr('User alresady exists'));
+            return res.render('users/register',{
+                error: "Email already in use",
+            });
         }
         //hash password
         const salt = await bcrypt.genSalt(10);
@@ -37,28 +41,31 @@ const registerCtrl = async(req, res, next)=>{
 const loginCtrl = async(req, res, next)=>{
     const {email, password} = req.body;
     if(!email || !password){
-        return next(appErr('Email and password fields are required'));
+        return res.render('users/login',{
+            error: "All fields are required",
+        });
     }
     try {
         //check if email exists
         const userFound = await User.findOne({ email });
         if(!userFound) {
             //throw an error
-            return next(appErr('Invalid login credentials'));
+            return res.render('users/login',{
+                error: "Invalid login credentials",
+            });
         }
         //verify password
         const isPasswordValid = await bcrypt.compare(password, userFound.password);
         if(!isPasswordValid){
         //throw an error
-        return next(appErr('Invalid login credentials'));
+        return res.render('users/login',{
+            error: "Invalid login credentials",
+        });
         }
         //save the user into session
         req.session.userAuth = userFound._id;
         console.log(req.session)
-        res.json({
-            status: 'success',
-            data: userFound,
-        });
+        res.redirect('/api/v1/users/profile-page');
     } catch (error) {
         res.json(error);
     }
@@ -89,9 +96,10 @@ const profileCtrl = async(req, res)=>{
         const user = await User.findById(userId)
         .populate('posts')
         .populate('comments');
+        res.render('users/profile', { user });
         res.json({
             status: 'success',
-            data: user
+            data: user,
         });
     } catch (error) {
         res.json(error);
@@ -102,15 +110,23 @@ const profileCtrl = async(req, res)=>{
 const uploadProfilePhotoCtrl = async(req, res, next)=>{
     console.log(req.file.path)
     try {
+        //check if file exists
+        if(!req.file){
+            res.render('users/uploadProfilePhoto', {
+                error: 'Please upload image',
+            });
+        }
         //find the user to be updated
         const userId = req.session.userAuth;
         const userFound = await User.findById(userId);
         //check if user found
         if(!userFound){
-            return next(appErr('User not found', 403))
+            return res.render('users/uploadProfilePhoto', {
+                error: 'User not found',
+            });
         }
         //update profile photo
-        await User.findByIdAndUpdate(
+        const userUpdated = await User.findByIdAndUpdate(
             userId, 
             {
                 profileImage: req.file.path,
@@ -119,13 +135,12 @@ const uploadProfilePhotoCtrl = async(req, res, next)=>{
                 new: true,
             }
         );
-        res.json({
-            status: 'success',
-            data: 'You have successfully updated your profile photo',
-        });
+        //redirect
+        res.redirect('api/v1/users/profile-page')
     } catch (error) {
-        res.json(error);
-        next(appErr(error.message));
+        return res.render('users/uploadProfilePhoto', {
+            error: error.message,
+        });
     }
 };
 
@@ -222,14 +237,10 @@ const updateUserCtrl = async (req, res) => {
 
 //logout
 const logoutCtrl = async(req, res)=>{
-    try {
-        res.json({
-            status: 'success',
-            user: 'User logout'
-        });
-    } catch (error) {
-        res.json(error);
-    }
+    //destroy session
+    req.session.destroy(()=>{
+    res.redirect('/api/v1/users/login');
+    });
 };
 
 

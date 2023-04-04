@@ -23,16 +23,22 @@ const upload = multer({ storage });
 //rendering forms
 //login form
 userRoutes.get('/login', (req, res) => {
-    res.render('users/login');
+    res.render('users/login', {
+        error:'',
+    });
 });
 //register form
 userRoutes.get('/register', (req, res) => {
-    res.render('users/register');
+    res.render('users/register', {
+        error: ''
+    });
 });
-//profile template
-userRoutes.get('/profile-page', (req, res) => {
-    res.render('users/profile');
-});
+
+//profile template-(testing)
+// userRoutes.get('/profile-page', (req, res) => {
+//     res.render('users/profile');
+// });
+
 //upload profile photo
 userRoutes.get('/upload-profile-photo-form', (req, res) => {
     res.render('users/uploadProfilePhoto');
@@ -54,10 +60,7 @@ userRoutes.post('/register', upload.single('profile'), registerCtrl);
 userRoutes.post('/login', loginCtrl);
 
 //GET/api/v1/users/profile
-userRoutes.get('/profile', protected, profileCtrl);
-
-//GET/api/v1/users/:id
-userRoutes.get('/:id', userDetailsCtrl);
+userRoutes.get('/profile-page', protected, profileCtrl);
 
 //PUT/api/v1/users/profile-photo-upload/:id
 userRoutes.put(
@@ -83,5 +86,12 @@ userRoutes.put('/update/:id', updateUserCtrl);
 
 //GET/api/v1/users/logout
 userRoutes.get('/logout', logoutCtrl);
+
+//GET/api/v1/users/:id
+userRoutes.get('/:id', userDetailsCtrl);
+
+
+
+
 
 module.exports = userRoutes;
