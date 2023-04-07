@@ -13,9 +13,10 @@
     <link rel="stylesheet" href="/public/css/uploadPhoto.css" />
     <title>Upload Profile Photo</title>
   </head>
-    <!--nav-->
-<%-include('../partials/navbar.ejs') %>
+    
   <body>
+    <!--nav-->
+    <%-include('../partials/navbar.ejs') %>
     <div class="form-container">
       <!-- icon -->
       <h1>Upload Profile photo</h1>
@@ -27,7 +28,7 @@
           <i class="fas fa-exclamation-circle"></i>
           <%=error%>
         </small>
-      <%}%>
+        <%}%>
       <form 
         action="/api/v1/users/profile-photo-upload?_method=PUT" 
         method="POST"

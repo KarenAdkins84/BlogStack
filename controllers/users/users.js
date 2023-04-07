@@ -112,7 +112,7 @@ const uploadProfilePhotoCtrl = async(req, res, next)=>{
     try {
         //check if file exists
         if(!req.file){
-            res.render('users/uploadProfilePhoto', {
+            return res.render('users/uploadProfilePhoto', {
                 error: 'Please upload image',
             });
         }
@@ -136,7 +136,7 @@ const uploadProfilePhotoCtrl = async(req, res, next)=>{
             }
         );
         //redirect
-        res.redirect('api/v1/users/profile-page')
+    res.redirect('/api/v1/users/profile-page');
     } catch (error) {
         return res.render('users/uploadProfilePhoto', {
             error: error.message,
@@ -147,12 +147,20 @@ const uploadProfilePhotoCtrl = async(req, res, next)=>{
 //upload-cover-image
 const uploadCoverPhotoCtrl = async(req, res)=>{
     try {
+        //check if file exists
+        if(!req.file){
+            return res.render('users/uploadCoverPhoto', {
+                error: 'Please upload image',
+            });
+        }
         //find the user to be updated
         const userId = req.session.userAuth;
         const userFound = await User.findById(userId);
         //check if user found
         if(!userFound){
-            return next(appErr('User not found', 403))
+            return res.render('users/uploadCoverPhoto', {
+                error: 'User not found',
+            });
         }
         //update cover photo
         await User.findByIdAndUpdate(
@@ -164,13 +172,12 @@ const uploadCoverPhotoCtrl = async(req, res)=>{
                 new: true,
             }
         );
-        res.json({
-            status: 'success',
-            data: 'You have successfully updated your cover photo',
-        });
+             //redirect
+    res.redirect('/api/v1/users/profile-page');
     } catch (error) {
-        res.json(error);
-        next(appErr(error.message));
+        return res.render('users/uploadCoverPhoto', {
+            error: error.message,
+        });
     }
 };
 

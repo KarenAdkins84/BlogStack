@@ -41,11 +41,11 @@ userRoutes.get('/register', (req, res) => {
 
 //upload profile photo
 userRoutes.get('/upload-profile-photo-form', (req, res) => {
-    res.render('users/uploadProfilePhoto');
+    res.render('users/uploadProfilePhoto', { error: '' });
 });
 //upload cover photo
 userRoutes.get('/upload-cover-photo-form', (req, res) => {
-    res.render('users/uploadCoverPhoto');
+    res.render('users/uploadCoverPhoto', { error: '' });
 });
 //update user form
 userRoutes.get('/update-user-form', (req, res) => {
