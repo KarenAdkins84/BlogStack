@@ -1,7 +1,7 @@
 const bcrypt = require("bcryptjs");
 const User = require("../../model/user/User");
 const appErr = require("../../utils/appErr");
-
+const Post = require('../../model/post/Post');
 //register
 const registerCtrl = async(req, res, next)=>{
     const { fullname, email, password } = req.body;
@@ -78,12 +78,14 @@ const userDetailsCtrl = async(req, res)=>{
         const userId = req.params.id;
         // find the user
         const user = await User.findById(userId);
-        res.json({
-            status: 'success',
-            data: user,
+        res.render('users/updateUser', {
+            user,
+            error: '',
         });
     } catch (error) {
-        res.json(error);
+        res.render('users/updateUser', {
+            error: error.message,
+        });
     }
 };
 
@@ -97,10 +99,6 @@ const profileCtrl = async(req, res)=>{
         .populate('posts')
         .populate('comments');
         res.render('users/profile', { user });
-        res.json({
-            status: 'success',
-            data: user,
-        });
     } catch (error) {
         res.json(error);
     }
@@ -192,7 +190,7 @@ const updatePasswordCtrl = async(req, res, next)=>{
             const passwordHashed = await bcrypt.hash(password, salt);
             //update user
             await User.findByIdAndUpdate(
-                req.params.id, 
+                req.session.userAuth, 
                 {
                     password: passwordHashed,
                 },
@@ -200,31 +198,39 @@ const updatePasswordCtrl = async(req, res, next)=>{
                     new: true,
                 }
             );
-            res.json({
-                status: 'success',
-                user: "Password has been changed successfully",
-            });
+            res.redirect('/api/v1/users/profile-page');
         }
     } catch (error) {
-        return next(appErr('Please provide password field'));
+        return res.render('users/updateUser', {
+            error: error.message,
+        });
     }
 };
 
 //update user
-const updateUserCtrl = async (req, res) => {
+const updateUserCtrl = async (req, res, next) => {
     
-    const {fullname, email, password} = req.body
+    const {fullname, email } = req.body;
     try {
+        if(!fullname || !email){
+            return res.render('users/updateUser', {
+                error: 'Please provide details',
+                user: '',
+            });  
+        }
         //check that email has not been used before
         if(email){
             const emailUsed = await User.findOne({ email });
             if(emailUsed){
-                return next(appErr('Email is already in use', 400));
+                return res.render('users/updateUser', {
+                    error: 'Email is already in use',
+                    user: '',
+                });
             }
         }
         //update user
-        const user = await User.findByIdAndUpdate(
-            req.params.id,
+        await User.findByIdAndUpdate(
+            req.session.userAuth,
             {
                 fullname,
                 email,
@@ -233,12 +239,12 @@ const updateUserCtrl = async (req, res) => {
                 new: true,
             }
         );
-        res.json({
-            status: 'success',
-            data: user,
-        });
+        res.redirect('/api/v1/users/profile-page');
     } catch (error) {
-        return next(appErr(error.message)); 
+        return res.render('users/updateUser', {
+            error: error.message,
+            user: '',
+        }); 
     }
 };
 

@@ -1,17 +1,22 @@
 require('dotenv').config();
 const express = require('express');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
+const methodOverride = require('method-override');
 const globalErrHandler = require('./middlewares/globalHandler');
 const userRoutes = require('./routes/users/users');
 const postRoutes = require('./routes/posts/posts');
 const commentRoutes = require('./routes/comments/comment');
-
-const session = require('express-session');
-const MongoStore = require('connect-mongo');
-const methodOverride = require('method-override');
+const Post = require('./model/post/Post');
+const { truncatePost } = require('./utils/helpers');
 
 require('./config/dbConnect');
 
 const app = express();
+
+//helpers
+app.locals.truncatePost = truncatePost;
+
 //middlewares
 //config ejs
 app.set('view engine', "ejs");
@@ -46,9 +51,14 @@ app.use((req, res, next)=>{
 });
 
 //render home
-app.get('/', (req, res)=>{
-    res.render('index')
-})
+app.get('/', async (req, res)=>{
+    try {
+        const posts = await Post.find().populate('user');
+        res.render('index', { posts });
+    } catch (error) {
+        res.render('index', { error: error.message });
+    }
+});
 
 //users route base url
 ///api/v1/users

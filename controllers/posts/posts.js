@@ -7,12 +7,11 @@ const createPostCtrl = async (req, res, next)=> {
     const { title, description, category, user } = req.body;
     try {
         if(!title || !description || !category || !req.file) {
-            return next(appErr('All fields are required'));
+            return res.render('posts/addPost', { error: 'All fields are required' });
         }
         //find the user
         const userId = req.session.userAuth;
         const userFound = await User.findById(userId);
-        console.log(userId);
         //create post
         const postCreated = await Post.create({
             title,
@@ -29,15 +28,17 @@ const createPostCtrl = async (req, res, next)=> {
             status: 'success',
             data: postCreated,
         });
+        //redirect
+        res.redirect('/');
     } catch (error) {
-        next(appErr(error.message));
+        return res.render('posts/addPost', { error: error.message });
     }
 };
 
 //get all posts
 const fetchPostsCtrl = async (req, res, next)=> {
     try {
-        const posts = await Post.find().populate('comments');
+        const posts = await Post.find().populate('comments').populate('user');
         res.json({
             status: 'success',
             data: posts,
@@ -54,9 +55,9 @@ const singlePostCtrl = async (req, res, next)=> {
         const id = req.params.id;
         //find the post
         const post = await Post.findById(id).populate('comments');
-        res.json({
-            status: 'success',
-            data: post,
+        res.render('posts/postDetails', {
+            post,
+            error: '',
         });
     } catch (error) {
         next(appErr(error.message));
