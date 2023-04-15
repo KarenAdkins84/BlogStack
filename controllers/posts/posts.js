@@ -24,10 +24,7 @@ const createPostCtrl = async (req, res, next)=> {
         userFound.posts.push(postCreated._id);
         //resave updated user info
         await userFound.save();
-        res.json({
-            status: 'success',
-            data: postCreated,
-        });
+        
         //redirect
         res.redirect('/');
     } catch (error) {
@@ -71,16 +68,20 @@ const deletePostCtrl = async (req, res, next)=> {
         const post = await Post.findById(req.params.id);
         //check if post belongs to user
         if(post.user.toString() !== req.session.userAuth.toString()) {
-            return next(appErr('You are not allowed to delete this post', 403));
+            return res.render('posts/postDetails', {
+                error: "You are not authorized to delete this post",
+                post,
+            });
         }
         //delete post
-        const deletePost = await Post.findByIdAndDelete(req.params.id);
-        res.json({
-            status: 'success',
-            data: 'Post has been successfully deleted'
-        });
+        await Post.findByIdAndDelete(req.params.id);
+        //redirect
+        res.redirect('/');
     } catch (error) {
-        next(appErr(error.message));
+        return res.render('posts/postDetails', {
+            error: error.message,
+            post: '',
+        });
     }
 };
 

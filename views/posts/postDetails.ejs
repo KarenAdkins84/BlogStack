@@ -21,27 +21,33 @@
   </head>
   <body>
     <!--nav-->
-<%-include('../partials/navbar.ejs') %>
+<%-include('../partials/navbar.ejs'); -%>
     <!-- content -->
     <section class="container-flex">
       <!-- main -->
-      <main>
-        <article class="post-content">
+      <main class="post-details">
+        <article class="post-details-content">
+          
           <img src="<%=post?.image%>" alt="" class="post-image" />
-          <p class="post-info">
-            <span class="post-author">
-              <i class="fas fa-user"></i>
-              <%=post?.user?.fullname%>
-            </span>
-            <span class="post-date">
-              <i class="far fa-calendar-alt"></i>
-              <time datetime="2020-01-01"><%=post?.createdAt.toLocaleDateString()%></time>
-            </span>
-          </p>
-          <h1 class="post-title"><%=post?.title%>></h1>
-          <p class="post-body">
-            <%=post?.description%>
-          </p>
+          <%if(post?.user?._id.toString() === userAuth?.toString()){%>
+            <div class="post-details-actions">
+              <!--update post icon-->
+            <a href="/api/v1/posts/get-form-update/<%=post?._id%>">
+              <i class="fas fa-edit"></i>
+            </a>
+            <!--delete post icon-->
+            <form action="/api/v1/posts/<%=post?._id%>?_method=DELETE" 
+              method="post">
+              <button>
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </form>
+        </div>
+          <%}%>
+          
+          
+          <h1 class="post-title"><%=post?.title%></h1>
+          <p class="post-body"><%=post?.description%></p>
         </article>
         <!-- Comment form -->
         <div class="comment-form">
@@ -65,7 +71,7 @@
                 class="comment-author-image"
               />
               <div class="comment-author">
-                <h4>John Doe</h4>
+                <h4><%=post?.user?.fullname%></h4>
                 <span>January 1, 2020</span>
               </div>
             </div>
@@ -76,15 +82,7 @@
                 voluptatibus quae quidem quos nesciunt. Quisquam, quae
                 voluptatibus. Quisquam, quae voluptatibus.
               </p>
-              <!-- delete/update icon -->
-              <div class="comment-actions">
-                <a href="#" class="comment-update">
-                  <i class="fas fa-edit"></i>
-                </a>
-                <a href="#" class="comment-delete">
-                  <i class="fas fa-trash-alt"></i>
-                </a>
-              </div>
+              
             </div>
           </div>
           <div class="comment">
@@ -95,7 +93,7 @@
                 class="comment-author-image"
               />
               <div class="comment-author">
-                <h4>John Doe</h4>
+                <h4><%=post?.user?.fullname%></h4>
                 <span>January 1, 2020</span>
               </div>
             </div>
@@ -125,7 +123,7 @@
           <h2>About The Author</h2>
           <img class="avatar" src="<%=post?.user?.profileImage%>" alt="profile image" />
 
-          <h2 class="about-name"><%=post?.user?.role%></h2>
+          <h2 class="about-name"><%=post?.user?.fullname%></h2>
           <small><%=post?.user?.role%></small>
           <p class="about-me-bio">
             <%=post?.user?.bio%>
