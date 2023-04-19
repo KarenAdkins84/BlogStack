@@ -51,7 +51,12 @@ const singlePostCtrl = async (req, res, next)=> {
         //get the id from params
         const id = req.params.id;
         //find the post
-        const post = await Post.findById(id).populate('comments');
+        const post = await Post.findById(id).populate({
+            path: 'comments',
+            populate: {
+                path: 'user',
+            },
+        }).populate('user');
         res.render('posts/postDetails', {
             post,
             error: '',
@@ -93,27 +98,46 @@ const updatePostCtrl = async (req, res, next)=> {
         const post = await Post.findById(req.params.id);
         //check if post belongs to user
         if(post.user.toString() !== req.session.userAuth.toString()) {
-            return next(appErr('You are not allowed to update this post', 403));
+            return res.render('posts/updatePost', {
+                post: '',
+                error: 'You are not authorized to update this post',
+            });
+        }
+        //check if the user is updating the image
+        if(req.file){
+            await Post.findByIdAndUpdate(
+                req.params.id,
+                {
+                    title,
+                    description,
+                    category,
+                    image: req.file.path,
+                },
+                {
+                    new: true,
+                },
+            );
+        } else {
+            await Post.findByIdAndUpdate(
+                req.params.id,
+                {
+                    title,
+                    description,
+                    category,
+                },
+                {
+                    new: true,
+                },
+            );
         }
         //update
-        const postUpdated = await Post.findByIdAndUpdate(
-            req.params.id,
-            {
-                title,
-                description,
-                category,
-                image: req.file.path,
-            },
-            {
-                new: true,
-            },
-        );
-        res.json({
-            status: 'success',
-            data: postUpdated,
-        });
+        
+        res.redirect('/')
     } catch (error) {
-        res.json(error);
+        return res.render('posts/updatePost', {
+            post: '',
+            error: error.message,
+        });
     }
 };
 

@@ -13,6 +13,7 @@ const createCommentCtrl = async (req, res, next)=> {
         const comment = await Comment.create({
             user: req.session.userAuth,
             message,
+            post: post._id,
         });
         //push the comment to the post
         post.comments.push(comment._id);
@@ -24,11 +25,10 @@ const createCommentCtrl = async (req, res, next)=> {
         //save
         await post.save({ validationBeforeSave: false });
         await user.save({ validationBeforeSave: false });
+        console.log(post);
 
-        res.json({
-            status: 'success',
-            data: comment,
-        });
+        //redirect
+        res.redirect(`/api/v1/posts/${post._id}`);
     } catch (error) {
         next(appErr(error));
     }
@@ -37,17 +37,21 @@ const createCommentCtrl = async (req, res, next)=> {
 //single
 const commentDetailsCtrl = async (req, res, next)=> {
     try {
-        res.json({
-            status: 'success',
-            user: 'Comment details'
+        const comment = await Comment.findById(req.params.id);
+        res.render('comments/updateComment',{
+            comment,
+            error: '',
         });
     } catch (error) {
-        next(appErr(error));
+        res.render('comments/updateComment',{
+            error: error.message,
+        });
     }
 };
 
 //delete
 const deleteCommentCtrl = async (req, res, next)=> {
+    console.log(req.query.postId);
     try {
         //find comment
         const comment = await Comment.findById(req.params.id);
@@ -57,10 +61,8 @@ const deleteCommentCtrl = async (req, res, next)=> {
         }
         //delete comment
         await Comment.findByIdAndDelete(req.params.id);
-        res.json({
-            status: 'success',
-            data: 'Comment has been successfully deleted'
-        });
+        //redirect
+        res.redirect(`/api/v1/posts/${req.query.postId}`);
     } catch (error) {
         next(appErr(error));
     }
@@ -68,6 +70,7 @@ const deleteCommentCtrl = async (req, res, next)=> {
 
 //update
 const updateCommentCtrl = async (req, res, next)=> {
+    console.log('query', req.query);
     try {
         //find comment
         const comment = await Comment.findById(req.params.id);
@@ -89,10 +92,7 @@ const updateCommentCtrl = async (req, res, next)=> {
                 new: true,
             },
         );
-        res.json({
-            status: 'success',
-            data: commentUpdated,
-        });
+        res.redirect(`/api/v1/posts/${req.query.postId}`);
     } catch (error) {
         next(appErr(error.message));
     }
