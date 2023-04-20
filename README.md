@@ -18,9 +18,6 @@ Multer
 To run locally, install above dependencies and run 'npm i' in the terminal
 To start: npm run server
 To view: http://localhost/9000
-Or just visit the deployed application!
-
-## Deployed Application
 
 ### Github Repo
 https://github.com/KarenAdkins84/BlogStack
