@@ -2,6 +2,9 @@
   "name": "BlogStack",
   "version": "1.0.0",
   "description": "fullstack blog app",
+  "engines": {
+    "node": "14.17.3"
+  },
   "main": "server.js",
   "scripts": {
     "server": "nodemon",
