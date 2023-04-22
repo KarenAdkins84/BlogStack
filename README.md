@@ -1,13 +1,12 @@
 # BlogStack
 # Description
-Full-stack tech blog site built with HTML, CSS, JavaScript, MongoDb, Express.js, Node.js, and EJS template engine. Follows MVC architecture. Users can register and login, upload photos for each blog posted as well as profile photos. Users can create, edit and delete their posts, and create, edit and delete comments on other blog posts.
+Full-stack tech blog site built with HTML, CSS, JavaScript, MongoDb, Express.js, Node.js, and EJS template engine. Follows MVC architecture. Users can register and login, and upload photos for each blog posted as well as profile photos. Users can create, edit and delete their posts, and create, edit and delete comments on other blog posts.
 
 ## Installation
 The necessary dependencies to install are:
 
 Node.js
 Express.js
-Nodemon (optional to keep server running after changes)
 Bcrypt
 Cloudinary
 EJS
@@ -24,3 +23,11 @@ https://github.com/KarenAdkins84/BlogStack
 
 ### Credits
 This was built with Udemy online learning and Inovotek Academy online!
+
+### Screenshots
+![Screenshot](./public/assets/screenshot1.png)
+![Screenshot](./public/assets/screenshot2.png)
+![Screenshot](./public/assets/screenshotProfile.png)
+![Screenshot](./public/assets/screenshotAddPost.png)
+![Screenshot](./public/assets/screenshotPostDetails.png)
+![Screenshot](./public/assets/screenshotComment.png)
